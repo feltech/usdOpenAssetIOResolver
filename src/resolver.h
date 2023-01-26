@@ -7,6 +7,10 @@
 
 #include <pxr/usd/ar/defaultResolver.h>
 
+#include <openassetio/typedefs.hpp>
+
+OPENASSETIO_FWD_DECLARE(hostApi, Manager)
+
 class UsdOpenAssetIOResolver final : public PXR_NS::ArDefaultResolver {
  public:
   UsdOpenAssetIOResolver();
@@ -44,4 +48,5 @@ class UsdOpenAssetIOResolver final : public PXR_NS::ArDefaultResolver {
       const PXR_NS::ArResolvedPath &resolvedPath, WriteMode writeMode) const final;
 
  private:
+  openassetio::hostApi::ManagerPtr manager_;
 };

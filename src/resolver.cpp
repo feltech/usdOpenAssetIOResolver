@@ -5,11 +5,17 @@
 
 #include <utility>
 
-#include "pxr/base/tf/debug.h"
-#include "pxr/base/tf/diagnostic.h"
-#include "pxr/usd/ar/assetInfo.h"
-#include "pxr/usd/ar/defaultResolver.h"
-#include "pxr/usd/ar/defineResolver.h"
+#include <pxr/base/tf/debug.h>
+#include <pxr/base/tf/diagnostic.h>
+#include <pxr/usd/ar/assetInfo.h>
+#include <pxr/usd/ar/defaultResolver.h>
+#include <pxr/usd/ar/defineResolver.h>
+
+#include <openassetio/hostApi/HostInterface.hpp>
+#include <openassetio/hostApi/ManagerFactory.hpp>
+#include <openassetio/hostApi/ManagerImplementationFactoryInterface.hpp>
+#include <openassetio/log/LoggerInterface.hpp>
+#include <openassetio/python/hostApi.hpp>
 
 // NOLINTNEXTLINE
 PXR_NAMESPACE_USING_DIRECTIVE
@@ -21,9 +27,60 @@ TF_DEBUG_CODES(OPENASSETIO_RESOLVER)
 
 PXR_NAMESPACE_CLOSE_SCOPE
 
+namespace {
+/// Converter logger from OpenAssetIO log framing to USD log outputs.
+class UsdOpenAssetIOResolverLogger : public openassetio::log::LoggerInterface {
+ public:
+  void log(Severity severity, const openassetio::Str &message) override {
+    switch (severity) {
+      case Severity::kCritical:
+        TF_ERROR(TfDiagnosticType::TF_DIAGNOSTIC_FATAL_ERROR_TYPE, message + "\n");
+        break;
+      case Severity::kDebug:
+      case Severity::kDebugApi:
+        TF_DEBUG(OPENASSETIO_RESOLVER).Msg(message + "\n");
+        break;
+      case Severity::kError:
+        // TODO(EM) : Review to see which error types are most appropriate,
+        //  are all errors (not criticals) non fatal?
+        TF_ERROR(TfDiagnosticType::TF_DIAGNOSTIC_NONFATAL_ERROR_TYPE, message + "\n");
+        break;
+      case Severity::kInfo:
+      case Severity::kProgress:
+        TF_INFO(OPENASSETIO_RESOLVER).Msg(message + "\n");
+        break;
+      case Severity::kWarning:
+        TF_WARN(TfDiagnosticType::TF_DIAGNOSTIC_WARNING_TYPE, message + "\n");
+        break;
+    }
+  }
+};
+
+class UsdOpenAssetIOHostInterface : public openassetio::hostApi::HostInterface {
+ public:
+  [[nodiscard]] openassetio::Identifier identifier() const override {
+    return "org.openassetio.usdresolver";
+  }
+
+  [[nodiscard]] openassetio::Str displayName() const override {
+    return "OpenAssetIO USD Resolver";
+  }
+};
+}  // namespace
+
 // ------------------------------------------------------------
 /* Ar Resolver Implementation */
 UsdOpenAssetIOResolver::UsdOpenAssetIOResolver() {
+  const auto logger = std::make_shared<UsdOpenAssetIOResolverLogger>();
+
+  auto managerImplementationFactory =
+      openassetio::python::hostApi::createPythonPluginSystemManagerImplementationFactory(logger);
+
+  const auto hostInterface = std::make_shared<UsdOpenAssetIOHostInterface>();
+
+  manager_ = openassetio::hostApi::ManagerFactory::defaultManagerForInterface(
+      hostInterface, managerImplementationFactory, logger);
+
   TF_DEBUG(OPENASSETIO_RESOLVER).Msg("OPENASSETIO_RESOLVER: " + TF_FUNC_NAME() + "\n");
 }
 

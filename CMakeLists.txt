@@ -26,6 +26,9 @@ add_compile_options(-Wno-deprecated)  # This is just to avoid some spammy warnin
 # system path as per the install, so it will be found.
 find_package(pxr REQUIRED)
 
+# Find OpenAssetIO
+find_package(OpenAssetIO REQUIRED)
+
 # Add Static analysis targets
 include(StaticAnalyzers)
 if (OPENASSETIO_USDRESOLVER_ENABLE_CLANG_FORMAT)
@@ -37,6 +40,19 @@ endif ()
 if (OPENASSETIO_USDRESOLVER_ENABLE_CPPLINT)
     enable_cpplint()
 endif ()
+
+# Disable C++11 ABI by default, as per current VFX reference
+# platform(s), but allow optionally enabling.
+# For reference, note that the default varies by platform, e.g.
+# * CentOS 7.9.2009's GCC 6.3, `_GLIBCXX_USE_CXX11_ABI` is
+#   always `0` and cannot be overridden.
+# * Ubuntu 18.04's GCC 6.5, `_GLIBCXX_USE_CXX11_ABI` defaults
+#   to `1`, but can be overridden.
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
+#    CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
+#    option(OPENASSETIO_GLIBCXX_USE_CXX11_ABI "For gcc, use the new C++11 library ABI" OFF)
+#endif ()
+
 
 include(CompilerWarnings)
 add_subdirectory(src)

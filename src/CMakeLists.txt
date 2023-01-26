@@ -12,8 +12,10 @@ add_library(${PLUGIN_NAME}
 )
 
 target_link_libraries(${PLUGIN_NAME}
-    PUBLIC
+    PRIVATE
     ar
+    OpenAssetIO::openassetio-core
+    OpenAssetIO::openassetio-python-bridge
 )
 
 #-----------------------------------------------------------------------
@@ -29,6 +31,16 @@ endif ()
 if (OPENASSETIO_USDRESOLVER_ENABLE_CPPLINT)
     add_dependencies(${PLUGIN_NAME} openassetio-cpplint)
 endif ()
+
+# Whether to use the old or new C++ ABI with gcc.
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
+#    CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
+#    if (OPENASSETIO_GLIBCXX_USE_CXX11_ABI)
+#        target_compile_definitions(${PLUGIN_NAME} PRIVATE _GLIBCXX_USE_CXX11_ABI=1)
+#    else ()
+#        target_compile_definitions(${PLUGIN_NAME} PRIVATE _GLIBCXX_USE_CXX11_ABI=0)
+#    endif ()
+#endif ()
 
 #-----------------------------------------------------------------------
 # Main install
