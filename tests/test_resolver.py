@@ -65,7 +65,6 @@ def test_openassetio_resolver_has_no_effect_with_search_path():
 # level document containing an assetized reference resolvable by
 # OpenAssetIO to a third level document, and that the resolved paths
 # are search path based, then the document can be fully resolved.
-@pytest.mark.xfail(reason="OpenAssetIO not integrated yet")
 def test_recursive_assetized_resolve():
     stage = open_stage(
         "resources/integration_test_data/recursive_assetized_resolve/parking_lot.usd"
