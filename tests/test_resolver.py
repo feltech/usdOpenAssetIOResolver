@@ -93,7 +93,6 @@ def test_assetized_child_ref_non_assetized_grandchild():
 # level document containing an assetized reference resolvable by
 # OpenAssetIO to a third level document, then the document can be fully
 # resolved.
-@pytest.mark.xfail(reason="OpenAssetIO not integrated yet")
 def test_non_assetized_child_ref_assetized_grandchild():
     stage = open_stage(
         "resources/integration_test_data"
