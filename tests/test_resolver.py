@@ -38,7 +38,6 @@ def test_open_stage_and_logging(capfd):
 # Given a USD document that references an asset via a direct relative
 # file path, then the asset is resolved to the file path as expected.
 def test_openassetio_resolver_has_no_effect_with_no_search_path():
-
     stage = open_stage(
         "resources/integration_test_data/resolver_has_no_effect_with_no_search_path/parking_lot.usd"
     )
@@ -50,7 +49,6 @@ def test_openassetio_resolver_has_no_effect_with_no_search_path():
 # search-path based file path, then the asset is resolved to the file
 # path as expected.
 def test_openassetio_resolver_has_no_effect_with_search_path():
-
     context = build_search_path_context(
         "resources/integration_test_data/resolver_has_no_effect_with_search_path/search_path_root"
     )
@@ -115,7 +113,7 @@ def openassetio_configured():
     plugin = plugin_registry.GetPluginWithName("usdOpenAssetIOResolver")
 
     assert (
-        plugin is not None
+            plugin is not None
     ), "usdOpenAssetIOResolver plugin not loaded, please check PXR_PLUGINPATH_NAME env variable"
 
 
@@ -162,3 +160,24 @@ def open_stage(path_relative_from_file, context=None):
         return Usd.Stage.Open(full_path, context)
 
     return Usd.Stage.Open(full_path)
+
+
+@pytest.fixture(autouse=True)
+def bal_library(monkeypatch, test_data_root):
+    monkeypatch.setenv("BAL_LIBRARY_PATH",
+                       os.path.join(test_data_root, "bal_library.json"))
+
+
+@pytest.fixture(autouse=True)
+def test_data_root_env_var(monkeypatch, test_data_root):
+    """
+    The TEST_DATA_ROOT env var is expanded in the various BAL JSON
+    libraries, to provide portable absolute paths to file assets.
+    """
+    monkeypatch.setenv("TEST_DATA_ROOT", test_data_root)
+
+
+@pytest.fixture
+def test_data_root(scope="session"):
+    script_dir = os.path.realpath(os.path.dirname(__file__))
+    return os.path.join(script_dir, "resources", "integration_test_data")
