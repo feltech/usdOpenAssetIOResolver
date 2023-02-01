@@ -120,7 +120,8 @@ std::string UsdOpenAssetIOResolver::_CreateIdentifier(
     // (for now).
     identifier = assetPath;
   } else {
-    identifier = ArDefaultResolver::_CreateIdentifier(assetPath, anchorAssetPath);
+    identifier = ArDefaultResolver::_CreateIdentifier(
+        assetPath, ArResolvedPath{locationForEntity(anchorAssetPath).value_or(anchorAssetPath)});
   }
 
   logger_->debug("OPENASSETIO_RESOLVER: " + TF_FUNC_NAME());

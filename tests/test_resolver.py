@@ -78,7 +78,6 @@ def test_recursive_assetized_resolve():
 # document containing a non-assetized, adjacent relative file path
 # reference to a third level document, then the document can be fully
 # resolved.
-@pytest.mark.xfail(reason="OpenAssetIO not integrated yet")
 def test_assetized_child_ref_non_assetized_grandchild():
     stage = open_stage(
         "resources/integration_test_data"
